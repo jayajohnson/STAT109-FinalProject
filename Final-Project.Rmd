@@ -1,0 +1,178 @@
+---
+title: Analysis - Covid with other factors influencing unemployment
+  rate
+author: "Jaya Johnson"
+date: "4/19/2021"
+output: pdf_document
+---
+**Summary of Proposed Analysis**. 
+In this section we are analyzing the impact of various factors that may or may not contribute to the overall unemployment rate. Some of the contributing factors are: 
+
+1) Race (we are taking into consideration the unemployment rate of African Americans, Hispanic Americans, White Americans, Asian Americans).   
+
+2) Gender (unemployment rate for males and females).  
+
+3) Overall monthly job loss percent.   
+
+4) Monthly Covid Numbers.  
+
+As a part of this analysis we would like to understand the relationship between the different contributing factors and employment rate.  
+
+We would take the most influential parameters, come up with different hypothesis and come up with a multiple regression analysis to predict the unemployment rate.
+
+**Data Analysis**
+
+
+```{r}
+library(readr)
+Covid_and_Unemployment_US <- read_csv("Covid and Unemployment US - Sheet1.csv")
+```
+
+```{r}
+unemployment_df <- data.frame(Covid_and_Unemployment_US)
+unemployment_df[is.na(unemployment_df)] = 0
+unemployment_df$Date <- as.Date(unemployment_df$Date , format = "%d/%m/%y")
+head(unemployment_df)
+
+```
+```{r}
+library(funModeling) 
+library(tidyverse) 
+library(Hmisc)
+```
+```{r}
+print("Raw Data Metrics")
+status(unemployment_df)
+```
+```{r}
+plot_num(unemployment_df)
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+library(cowplot)
+gp1<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate)) + 
+  geom_line(color = "#fc03f0", size = 1) +
+  xlab("") +
+  ylab("Unemployment Rate")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp2<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.AfricanAmerican)) +
+  geom_line(color = "#FC4E07", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - African Americans")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp3<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.White)) + 
+  geom_line(color = "#8403fc", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - White")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp4<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Asian)) + 
+  geom_line(color = "#036ffc", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Asian")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp5<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Hispanic)) + 
+  geom_line(color = "#03e7fc", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Hispanic")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp6<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Men)) + 
+  geom_line(color = "#03fcd3", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Male")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp7<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Women)) + 
+  geom_line(color = "#98fc03", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Female")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp8<-ggplot(data = unemployment_df, aes(x = Date, y = 	Percent.JobLosers)) + 
+  geom_line(color = "#fce303", size = 1) +
+  xlab("") +
+  ylab("Percent of Job Losers")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp9<-ggplot(data = unemployment_df, aes(x = Date, y = 	CovidCases)) + 
+  geom_line(color = "#fc6f03", size = 1) +
+  xlab("") +
+  ylab("Covid Cases")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+plot_grid(gp1, gp2, gp3, gp4, gp5, gp6, gp7, gp8, gp9, labels = c('','','','','','','','',''), label_size = 4)
+```
+
+```{r}
+library(viridis)
+gp1<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.AfricanAmerican)) + 
+geom_point(aes(colour=Unemployment.Rate.AfricanAmerican))+
+scale_color_viridis(option = "D")
+
+gp1
+
+gp2<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.Asian)) + 
+geom_point(aes(colour=Unemployment.Rate.Asian))+
+scale_color_viridis(option = "A")
+
+gp2
+
+gp3<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.White)) + 
+geom_point(aes(colour=Unemployment.Rate.White))+
+scale_color_viridis(option = "B")
+
+gp3
+
+gp4<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.Hispanic)) + 
+geom_point(aes(colour=Unemployment.Rate.Hispanic))+
+scale_color_viridis(option = "C")
+
+gp4
+
+gp5<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, 
+y=Unemployment.Rate.Men)) +
+geom_point(aes(colour=Unemployment.Rate.Men))+
+scale_color_viridis(option = "D")
+
+gp5
+
+gp6<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.Women))+
+geom_point(aes(colour=Unemployment.Rate.Women))+
+scale_color_viridis(option = "E")
+
+gp6
+
+gp7<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, 
+y=Percent.JobLosers))+
+geom_point(aes(colour=Percent.JobLosers))+
+scale_color_viridis(option = "F")
+
+gp7
+
+gp8<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=CovidCases))+
+geom_point(aes(colour=CovidCases))+
+scale_color_viridis(option = "G")
+
+gp8
+
+```
+
