@@ -152,7 +152,7 @@ unemployment_changes <- unemployment_changes[c(-15),]
 
 
 
-Now let's find the correlation between COVID cases and deaths, and state unemployment rates.
+Now let's find the correlation between COVID cases and deaths, and unemployment in each state.
 
 Warning: this code chunk displays 104 scatterplots!
 
@@ -170,6 +170,24 @@ Warning: this code chunk displays 104 scatterplots!
 # }
 ```
 
+This time, concatenate all states to find the overall correlations for cases and deaths to unemployment:
+
+```{r}
+cases <- numeric(14*52)
+deaths <- numeric(14*52)
+unemp <- numeric(14*52)
+for (m in 1:14) {
+  for (s in 1:52) {
+    cases[s+52*(m-1)] <- cases_data[m,s+2]
+    deaths[s+52*(m-1)] <- deaths_data[m,s+2]
+    unemp[s+52*(m-1)] <- unemployment_changes[m,s+2]
+  }
+}
+cases_vs_unemp <- lm(unemp ~ cases)
+summary(cases_vs_unemp)
+deaths_vs_unemp <- lm(unemp ~ deaths)
+summary(deaths_vs_unemp)
+```
 
 
 
