@@ -1,0 +1,42 @@
+---
+title: "Final Project - Impact of COVID on employment rate and financial markets."
+author: "Priya Gundubonia,Iman Ismail,Jaya Johnson,Robi Rahman"
+date: "5/5/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Project summary and research motivation**. 
+The motivation for this project comes from looking at the unemployment rate and the performance of stock indices during the pandemic. Our interest in the subject stems from the fact that despite the drop in employment rates the stock indices across the world have not been impacted. 
+
+Our research is broken down into the following sections:  
+
+1) Analysing the different factors that contribute to the unemployment rate and study the impact of COVID numbers in the U.S on the unemployment rate. 
+
+2). 
+
+3). 
+
+4). 
+
+We have downloaded raw data from department of labor statistics. COVID data tracker from CDC. All our data cleansing, analysis is done in R.
+
+### **Section 1**. 
+**Summary:**. 
+
+**Hypothesis:**. 
+
+**Conclusion:**. 
+
+
+
+
+
+
+
+
+
+

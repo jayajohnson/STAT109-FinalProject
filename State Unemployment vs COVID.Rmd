@@ -151,7 +151,6 @@ unemployment_changes <- unemployment_changes[c(-15),]
 ```
 
 
-
 Now let's find the correlation between COVID cases and deaths, and unemployment in each state.
 
 Warning: this code chunk displays 104 scatterplots!
@@ -183,17 +182,57 @@ for (m in 1:14) {
     unemp[s+52*(m-1)] <- unemployment_changes[m,s+2]
   }
 }
-cases_vs_unemp <- lm(unemp ~ cases)
-summary(cases_vs_unemp)
-deaths_vs_unemp <- lm(unemp ~ deaths)
-summary(deaths_vs_unemp)
+# cases_vs_unemp <- lm(unemp ~ cases)
+# summary(cases_vs_unemp)
+# deaths_vs_unemp <- lm(unemp ~ deaths)
+# summary(deaths_vs_unemp)
+
+both_vs_unemp <- lm(unemp ~ cases + deaths)
+summary(both_vs_unemp)
 ```
 
 
+Adjusting case and death counts by state to obtain per capita figures:
+
+```{r}
+state_pops <- read.csv("output/State populations 2020.csv")[,-1]
+# Delete New York City because it's not in the state population list
+cases_per_capita <- cases_data[,-38]
+deaths_per_capita <- deaths_data[,-38]
+
+for (m in 1:15) {
+  for (s in 1:51) {
+    # divide cases_data and deaths_data columns by the pop of that state
+    cases_per_capita[m,s+2] <- cases_per_capita[m,s+2]/as.numeric(state_pops[2,s])
+    deaths_per_capita[m,s+2] <- deaths_per_capita[m,s+2]/as.numeric(state_pops[2,s])
+  }
+}
+```
 
 
+Repeating the above analysis using the per capita rates instead of gross figures:
 
 
+```{r}
+cases <- numeric(14*51)
+deaths <- numeric(14*51)
+unemp <- numeric(14*51)
+for (m in 1:14) {
+  for (s in 1:51) {
+    cases[s+51*(m-1)] <- cases_per_capita[m,s+2]
+    deaths[s+51*(m-1)] <- deaths_per_capita[m,s+2]
+    unemp[s+51*(m-1)] <- unemployment_changes[m,s+2]
+  }
+}
+# cases_vs_unemp <- lm(unemp ~ cases)
+# summary(cases_vs_unemp)
+# deaths_vs_unemp <- lm(unemp ~ deaths)
+# summary(deaths_vs_unemp)
+
+both_vs_unemp <- lm(unemp ~ cases + deaths)
+summary(both_vs_unemp)
+plot(both_vs_unemp)
+```
 
 
 
