@@ -1,0 +1,316 @@
+---
+title: Analysis - Covid with other factors influencing unemployment
+  rate
+output: pdf_document
+---
+\begin{center}
+Section 1. 
+\end{center}
+*Summary*: In this section we are analyzing the impact of various factors that may or may not contribute to the overall unemployment rate during the pandemic. Some of the contributing factors are: 
+
+1) Race (we are taking into consideration the unemployment rate of African Americans, Hispanic Americans, White Americans, Asian Americans).   
+
+2) Gender (unemployment rate for males and females).  
+
+3) Overall monthly job loss percent.   
+
+4) Monthly Covid Numbers.  
+
+As a part of this analysis we would like to understand the relationship between the different contributing factors and employment rate. 
+
+**Hypothesis**: *Our Hypothesis is that the following factors Race, Gender, Job Loss, Number of COVID cases influences predicting the monthly unemployment rate in the US.* Unemployment among different demographics like race and gender are contributing factors to the unemployment rate. In addition monthly job loss percent which may or may not be impacted by Covid numbers also influence the unemployment rate. All data points are represented in a percentage of the overall unemployment rate. Covid numbers are the cumulative totals for the time period.
+
+
+
+
+**Data Exploration**: We looked at the basic metrics for the distribution of the data, by running summary and histogram of the data.
+
+
+```{r echo=FALSE, message=FALSE }
+library(funModeling) 
+library(tidyverse) 
+library(Hmisc)
+library(readr)
+```
+```{r echo=FALSE, message=FALSE}
+Covid_and_Unemployment_US <- read_csv("Covid and Unemployment US - Sheet1.csv")
+```
+
+```{r echo=FALSE}
+unemployment_df <- data.frame(Covid_and_Unemployment_US)
+unemployment_df[is.na(unemployment_df)] = 0
+unemployment_df$Date <- as.Date(unemployment_df$Date)
+unemployment_df$TotalPop <- c(328000000,328000000,328000000,328000000,328000000,328000000,328000000,328000000,328000000,328000000,328000000,328000000,331000000,331000000,331000000,331000000,331000000,331000000,331000000,331000000,331000000,331000000,331000000,331000000,332000000,332000000,332000000)
+unemployment_df$Covid.Cases.Percent=(unemployment_df$Covid.Cases/unemployment_df$TotalPop)*100
+```
+
+```{r}
+print("Raw Data Metrics")
+str(unemployment_df)
+summary(unemployment_df)
+```
+From the distribution of data we can see that the unemployment rates for all demographics ranges between 2-18%. We also note that since Covid Cases is a total number the ranges are huge in comparison to all other attributes. 
+
+*Histograms of data columns*
+```{r}
+hist_cols<-unemployment_df[,2:16,18]
+plot_num(hist_cols)
+```
+As we observe the figures above we can say that the data is right skewed which is desired as we would like the unemployment rate to be low. Unemployment among African, Hispanic and Asian Americans was considerably higher than White Americans. Male and Female distributions were fairly similar.
+
+*Time Series Plots:*
+```{r echo=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+```{r echo=FALSE, message=FALSE}
+library(cowplot)
+gp1<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate)) + 
+  geom_line(color = "#fc03f0", size = 1) +
+  xlab("") +
+  ylab("Unemployment Rate")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp2<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.AfricanAmerican)) +
+  geom_line(color = "#FC4E07", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - African Americans")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp3<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.White)) + 
+  geom_line(color = "#8403fc", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - White")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp4<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Asian)) + 
+  geom_line(color = "#036ffc", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Asian")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp5<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Hispanic)) + 
+  geom_line(color = "#03e7fc", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Hispanic")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp6<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Men)) + 
+  geom_line(color = "#03fcd3", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Male")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp7<-ggplot(data = unemployment_df, aes(x = Date, y = Unemployment.Rate.Women)) + 
+  geom_line(color = "#98fc03", size = 1) +
+  xlab("") +
+  ylab("UnemploymentRate - Female")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp8<-ggplot(data = unemployment_df, aes(x = Date, y = 	Percent.JobLosers)) + 
+  geom_line(color = "#fce303", size = 1) +
+  xlab("") +
+  ylab("Percent of Job Losers")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+gp9<-ggplot(data = unemployment_df, aes(x = Date, y = 	Covid.Cases.Percent)) + 
+  geom_line(color = "#fc6f03", size = 1) +
+  xlab("") +
+  ylab("Covid Cases")+
+  theme(
+  axis.title.y = element_text(color="blue", size=6, face="bold"),
+)
+plot_grid(gp1, gp2, gp3, gp4, gp5, gp6, gp7, gp8, gp9)
+```
+
+```{r}
+require(ggplot2)
+require(reshape2)
+t_df<-unemployment_df[,c("Date","Unemployment.Rate","Unemployment.Rate.AfricanAmerican","Unemployment.Rate.Hispanic","Unemployment.Rate.White","Unemployment.Rate.Asian","Unemployment.Rate.Women","Unemployment.Rate.Men")]
+t_df$Date <- as.POSIXct(t_df$Date, format = "%m/%d/%Y %H:%M:%S") 
+t_df.m <- melt(t_df, id.vars = "Date")
+ggplot(t_df.m) + geom_line(aes(x = Date, y = value, colour = variable))
+                           
+```
+```{r}
+require(ggplot2)
+require(reshape2)
+t_df<-unemployment_df[,c("Date","Unemployment.Rate","Covid.Cases.Percent")]
+t_df$Date <- as.POSIXct(t_df$Date, format = "%m/%d/%Y %H:%M:%S") 
+t_df.m <- melt(t_df, id.vars = "Date")
+ggplot(t_df.m) + geom_line(aes(x = Date, y = value, colour = variable))
+                           
+```
+If we observer the time series plots there are spike in the various employment rates stats and job lose stats after the initial spike in Covid, with time these numbers stabalize to pre covid rates even though the number of Covid Cases spike. 
+
+*Scatter plot evaluate all predictor variables against unemployment rate*. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggpubr)
+library(viridis)
+
+gp1<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.AfricanAmerican)) + 
+geom_point(aes(colour=Unemployment.Rate.AfricanAmerican))+
+scale_color_viridis(option = "D")+
+theme(axis.title.x=element_blank(),axis.title.y=element_blank())
+
+gp2<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.Asian), xlab="", ylab="") + 
+geom_point(aes(colour=Unemployment.Rate.Asian))+
+scale_color_viridis(option = "A")+
+theme(axis.title.x=element_blank(),axis.title.y=element_blank())
+
+gp3<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.White)) + 
+geom_point(aes(colour=Unemployment.Rate.White))+
+scale_color_viridis(option = "B")
+
+gp4<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.Hispanic)) + 
+geom_point(aes(colour=Unemployment.Rate.Hispanic))+
+scale_color_viridis(option = "C")
+
+gp5<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, 
+y=Unemployment.Rate.Men)) +
+geom_point(aes(colour=Unemployment.Rate.Men))+
+scale_color_viridis(option = "D")
+
+gp6<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Unemployment.Rate.Women))+
+geom_point(aes(colour=Unemployment.Rate.Women))+
+scale_color_viridis(option = "E")
+
+gp7<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, 
+y=Percent.JobLosers))+
+geom_point(aes(colour=Percent.JobLosers))+
+scale_color_viridis(option = "F")
+
+gp8<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Covid.Cases))+
+geom_point(aes(colour=Covid.Cases))+
+scale_color_viridis(option = "G")
+
+gp9<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=Avg.Weekly.Hrs.Private))+
+geom_point(aes(colour=Avg.Weekly.Hrs.Private))+
+scale_color_viridis(option = "A")
+
+gp10<-ggplot(data = unemployment_df, aes(x=Unemployment.Rate, y=UnemploymentRate.Married))+
+geom_point(aes(colour=UnemploymentRate.Married))+
+scale_color_viridis(option = "A")
+
+ggarrange(gp1,gp2, ncol = 1, nrow = 2)
+ggarrange(gp3,gp4, ncol = 1, nrow = 2)
+ggarrange(gp5,gp6, ncol = 1, nrow = 2)
+ggarrange(gp7,gp8, ncol = 1, nrow = 2)
+ggarrange(gp9,gp10, ncol = 1, nrow = 2)
+```
+Most scatter plots show a positive linear relationship among the variables and the unemployment rate however a negative linear relationship is observed between COVID cases and unemployment rate.  
+
+*Correlation Matrix*. 
+```{r echo=FALSE, message=FALSE}
+par(mfrow=c(1,1))
+library(psych) 
+library(GGally)
+pair_df=unemployment_df[,3:16]
+ggpairs(pair_df,upper = list(continuous = wrap("cor", size = 2))) 
+```
+```{r echo=FALSE}
+library(corpcor)
+str(pair_df)
+cor2pcor(cov(pair_df))
+```
+```{r}
+library(mctest)
+unemployment_rt<-as.vector(unemployment_df$Unemployment.Rate)
+pair_df$Unemloyment.Rate=unemployment_rt
+model=lm(pair_df$Unemloyment.Rate~., data=pair_df)
+omcdiag(model)
+```
+```{r}
+imcdiag(model)
+```
+```{r}
+library(ppcor)
+dim(pair_df)
+cor(pair_df, method = "kendall")
+```
+
+  
+Spearmans correlation shows a strong correlation between all predictor variables and un employment rate. It shows a better correlation between Covid cases and unemployment rate .76 however running the recommended kendall correlation (because we have fewer data points) we note that the correlation between Covid cases and unemployment rate reduces to .49. 
+
+*Outliers*. 
+
+```{r echo=FALSE}
+par(mfrow=c(3,5))
+bp1<-boxplot(unemployment_df$Unemployment.Rate, col="darkgreen")
+bp2<-boxplot(unemployment_df$Covid.Cases.Percent, col="yellow")
+bp3<-boxplot(unemployment_df$Percent.JobLosers, col="red")
+bp4<-boxplot(unemployment_df$Unemployment.Rate.Women, col="blue")
+bp5<-boxplot(unemployment_df$Unemployment.Rate.Men, col="purple")
+bp6<-boxplot(unemployment_df$Unemployment.Rate.AfricanAmerican, col="green")
+bp7<-boxplot(unemployment_df$Unemployment.Rate.Asian, col="red")
+bp8<-boxplot(unemployment_df$Unemployment.Rate.Hispanic, col="yellow")
+bp9<-boxplot(unemployment_df$Unemployment.Rate.White, col="purple")
+bp10<-boxplot(unemployment_df$Avg.Weekly.Hrs.Financial, col="darkgreen")
+bp11<-boxplot(unemployment_df$Avg.Weekly.Hrs.Education.Health, col="blue")
+bp12<-boxplot(unemployment_df$Avg.Weekly.Hrs.Financial, col="red")
+bp13<-boxplot(unemployment_df$UnemploymentRate.Married, col="yellow")
+bp14<-boxplot(unemployment_df$Avg.Weekly.Hrs.Transportation.Wearhousing, col="purple")
+```
+As we can see above there are some outliers for each of the predictor variables, however this can be explained by the spikes in the months that COVID spread in the US.  
+
+
+
+```{r echo=FALSE}
+model <- lm(Unemployment.Rate ~ Unemployment.Rate.AfricanAmerican+Unemployment.Rate.Hispanic+Unemployment.Rate.White+Unemployment.Rate.Asian+Percent.JobLosers+Covid.Cases.Percent+Avg.Weekly.Hrs.Education.Health+Avg.Weekly.Hrs.Financial+Avg.Weekly.Hrs.Leisure.Hospitality+Avg.Weekly.Hrs.Transportation.Wearhousing+UnemploymentRate.Married, data=unemployment_df)
+summary(model)
+#"logit", "probit", "cauchit", "cloglog", "identity", "log", "sqrt", "1/mu^2", "inverse"
+```
+```{r}
+library(mctest)
+library(olsrr)
+reduced_df <- unemployment_df[,c("Unemployment.Rate.AfricanAmerican","Unemployment.Rate.Hispanic","Unemployment.Rate.White","Unemployment.Rate.Asian","Percent.JobLosers","Covid.Cases.Percent","Avg.Weekly.Hrs.Education.Health","Avg.Weekly.Hrs.Financial","Avg.Weekly.Hrs.Leisure.Hospitality","Avg.Weekly.Hrs.Transportation.Wearhousing","UnemploymentRate.Married")]
+unemployment_rt<-as.vector(unemployment_df$Unemployment.Rate)
+reduced_df$Unemloyment.Rate=unemployment_rt
+model=lm(reduced_df$Unemloyment.Rate~log(Unemployment.Rate.AfricanAmerican)+log(Unemployment.Rate.White)+log(Avg.Weekly.Hrs.Financial)+log(UnemploymentRate.Married)+log(Percent.JobLosers), data=reduced_df)
+#model=lm(sqrt(reduced_df$Unemloyment.Rate)~sqrt(Unemployment.Rate.AfricanAmerican)+sqrt(Unemployment.Rate.Hispanic)+sqrt(Unemployment.Rate.White)+sqrt(Unemployment.Rate.Asian)+sqrt(Percent.JobLosers)+sqrt(Covid.Cases.Percent)+sqrt(Avg.Weekly.Hrs.Education.Health)+sqrt(Avg.Weekly.Hrs.Financial)+sqrt(Avg.Weekly.Hrs.Leisure.Hospitality)+sqrt(Avg.Weekly.Hrs.Transportation.Wearhousing)+sqrt(UnemploymentRate.Married), data=reduced_df)
+#model=lm(reduced_df$Unemloyment.Rate~poly(Unemployment.Rate.AfricanAmerican,degree=3)+poly(Unemployment.Rate.Hispanic,degree=3)+poly(Unemployment.Rate.White,degree=3)+poly(Unemployment.Rate.Asian,degree=3)+poly(Percent.JobLosers,degree=3)+poly(Covid.Cases.Percent,degree=3)+poly(Avg.Weekly.Hrs.Education.Health,degree=3)+poly(Avg.Weekly.Hrs.Financial,degree=3)+poly(Avg.Weekly.Hrs.Leisure.Hospitality,degree=3)+poly(Avg.Weekly.Hrs.Transportation.Wearhousing,degree=3)+poly(UnemploymentRate.Married,degree=3), data=reduced_df)
+#
+# "identity", "log", "sqrt", "1/mu^2", "inverse"
+#bc <- boxcox(Unemloyment.Rate ~ ., data = reduced_df)
+summary(model)
+omcdiag(model)
+imcdiag(model)
+#ols_step_both_p(model)
+plot(model)
+```
+```{r}
+library(dominanceanalysis)
+glm.model <- glm(Unemployment.Rate ~ ., family=gaussian(link="identity"), data=unemployment_df)
+summary(glm.model)
+car::vif(glm.model)
+#bootavemodpres100<-bootAverageDominanceAnalysis(glm.model,R=10)
+#summary(bootavemodpres100,fit.functions=c("r2.m"))
+# "identity", "log", "sqrt", "1/mu^2", "inverse"
+# identity -> 0 -84.503 vif -- vlow
+# log -> 2 -39.542 vif -- vlow
+# sqrt -> 2 -59.369 vif - vlow
+# 1/mu^2 -> 5 -19 vif - vlow
+# inverse -> 4 -> AIC -24.392 - vlow
+```
+
+```{r}
+glm.model <- glm(Unemployment.Rate ~ Unemployment.Rate.AfricanAmerican+Unemployment.Rate.White+Avg.Weekly.Hrs.Financial+Percent.JobLosers, family=inverse.gaussian(link="1/mu^2"), data=unemployment_df)
+summary(glm.model)
+```
+```{r}
+model <- lm(Unemployment.Rate ~ Unemployment.Rate.AfricanAmerican+Unemployment.Rate.Hispanic+Unemployment.Rate.White+Unemployment.Rate.Asian+Unemployment.Rate.Women+Avg.Weekly.Hrs.Private, data=unemployment_df)
+summary(model)
+```
+
+
+
+
