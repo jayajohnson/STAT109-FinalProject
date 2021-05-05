@@ -153,7 +153,8 @@ unemployment_changes <- unemployment_changes[c(-15),]
 
 Now let's find the correlation between COVID cases and deaths, and unemployment in each state.
 
-Warning: this code chunk displays 104 scatterplots!
+This is commented out because it produces 104 scatterplots with ablines, but
+you can run this code to view the relationship within each state.
 
 ```{r}
 # for (i in 1:52) {
@@ -192,7 +193,7 @@ summary(both_vs_unemp)
 ```
 
 
-Adjusting case and death counts by state to obtain per capita figures:
+Adjusting case and death counts by state population to obtain per capita figures:
 
 ```{r}
 state_pops <- read.csv("output/State populations 2020.csv")[,-1]
@@ -234,7 +235,9 @@ summary(both_vs_unemp)
 plot(both_vs_unemp)
 ```
 
-
+So we see that cases and deaths are both highly significant predictors of
+monthly unemployment change, with a negative coefficient on cases and a positive
+coefficient for deaths.
 
 
 
